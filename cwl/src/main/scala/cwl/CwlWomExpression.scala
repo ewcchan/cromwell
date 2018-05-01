@@ -14,7 +14,6 @@ import wom.values._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.{Success, Try}
 
 trait CwlWomExpression extends WomExpression {
 
@@ -159,24 +158,16 @@ object InitialWorkDirFileGeneratorExpression {
             unmappedParameterContext.ioFunctionSet.copyFile(file.value, baseFileName)
           }
 
-          def stageFiles(unstagedInputValue: Try[WomValue]): ErrorOr[WomValue] = {
+          def stageFiles(womArray: WomArray): ErrorOr[WomValue] = {
             implicit val ec = unmappedParameterContext.ioFunctionSet.ec
 
-            import common.validation.ErrorOr._
-            for {
-              womArray <- unstagedInputValue.toErrorOr.map(_.asInstanceOf[WomArray])
-              unstagedFiles = womArray.value.map(_.asInstanceOf[WomFile])
-              stagedFiles = Await.result(Future.sequence(unstagedFiles map stageFile), Duration.Inf)
-              arrayOfStagedFiles <- womArray.womType.coerceRawValue(stagedFiles).toErrorOr
-            } yield arrayOfStagedFiles
+            val unstagedFiles = womArray.value.map(_.asInstanceOf[WomFile])
+            val stagedFiles = Await.result(Future.sequence(unstagedFiles map stageFile), Duration.Inf)
+            womArray.womType.coerceRawValue(stagedFiles).toErrorOr
           }
 
-          import mouse.all._
           expressionEvaluation flatMap {
-            case array: WomArray if WomArrayType(WomSingleFileType).coercionDefined(array) =>
-              WomArrayType(WomSingleFileType).coerceRawValue(array) |> stageFiles
-            case array: WomArray if WomArrayType(WomMaybePopulatedFileType).coercionDefined(array) =>
-              WomArrayType(WomMaybePopulatedFileType).coerceRawValue(array) |> stageFiles
+            case array: WomArray if array.value.forall(_.isInstanceOf[WomFile]) => stageFiles(array)
             case file: WomFile =>
               validate(Await.result(stageFile(file), Duration.Inf))
             case other =>
