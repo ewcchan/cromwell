@@ -61,14 +61,13 @@ final case class InitialWorkDirFileGeneratorExpression(entry: IwdrListingArrayEn
         }
       } yield WomMaybeListedDirectory(Option(directory), Option(fileListing))
     }
-    val updatedValues = mappedInputValues map {
+    val updatedValues = inputValues map {
       case (k, v: WomMaybeListedDirectory) => k -> recursivelyBuildDirectory(v.value).getOrElse(throw new RuntimeException("boom"))
       case (k, v: WomMaybePopulatedFile) => k -> WomSingleFile(v.value)
       case kv => kv
     }
     val unmappedParameterContext = ParameterContext(ioFunctionSet, expressionLib, updatedValues)
-    val q = entry.fold(InitialWorkDirFilePoly).apply(unmappedParameterContext, mappedInputValues)
-    q
+    entry.fold(InitialWorkDirFilePoly).apply(unmappedParameterContext, mappedInputValues)
   }
 }
 
