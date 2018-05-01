@@ -3,6 +3,7 @@ package cwl
 import cats.syntax.validated._
 import common.validation.ErrorOr.{ErrorOr, ShortCircuitingFlatMap}
 import common.validation.Validation._
+import cwl.FileParameter.sync
 import cwl.InitialWorkDirFileGeneratorExpression._
 import cwl.InitialWorkDirRequirement.IwdrListingArrayEntry
 import shapeless.Poly1
@@ -13,7 +14,7 @@ import wom.values._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Success, Try}
 
 trait CwlWomExpression extends WomExpression {
 
@@ -50,8 +51,25 @@ case class ECMAScriptWomExpression(expression: Expression,
 final case class InitialWorkDirFileGeneratorExpression(entry: IwdrListingArrayEntry, expressionLib: ExpressionLib) extends ContainerizedInputExpression {
 
   def evaluate(inputValues: Map[String, WomValue], mappedInputValues: Map[String, WomValue], ioFunctionSet: IoFunctionSet): ErrorOr[WomValue] = {
-    val unmappedParameterContext = ParameterContext(ioFunctionSet, expressionLib, inputValues)
-    entry.fold(InitialWorkDirFilePoly).apply(unmappedParameterContext, mappedInputValues)
+    def recursivelyBuildDirectory(directory: String): ErrorOr[WomMaybeListedDirectory] = {
+      import cats.instances.list._
+      import cats.syntax.traverse._
+      for {
+        listing <- sync(ioFunctionSet.listDirectory(directory)).toErrorOr
+        fileListing <- listing.toList.traverse[ErrorOr, WomFile] {
+          case e if sync(ioFunctionSet.isDirectory(e)).getOrElse(false) => recursivelyBuildDirectory(e)
+          case e => WomSingleFile(e).validNel
+        }
+      } yield WomMaybeListedDirectory(Option(directory), Option(fileListing))
+    }
+    val updatedValues = mappedInputValues map {
+      case (k, v: WomMaybeListedDirectory) => k -> recursivelyBuildDirectory(v.value).getOrElse(throw new RuntimeException("boom"))
+      case (k, v: WomMaybePopulatedFile) => k -> WomSingleFile(v.value)
+      case kv => kv
+    }
+    val unmappedParameterContext = ParameterContext(ioFunctionSet, expressionLib, updatedValues)
+    val q = entry.fold(InitialWorkDirFilePoly).apply(unmappedParameterContext, mappedInputValues)
+    q
   }
 }
 
