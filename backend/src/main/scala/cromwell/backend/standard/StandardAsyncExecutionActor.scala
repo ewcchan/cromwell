@@ -154,12 +154,12 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
   /**
     * The local root directory for the call, contains detritus files that the execution may not want to see.
     */
-  lazy val callDirectory: Path = jobPaths.callRoot
+  def callDirectory: Path
 
   /**
     * The local directory where the command will run.
     */
-  lazy val callExecutionDirectory: Path = jobPaths.callExecutionRoot
+  def callExecutionDirectory: Path
 
   /**
     * Returns the shell scripting for finding all files listed within a directory.
