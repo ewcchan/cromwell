@@ -27,10 +27,10 @@ final case class PipelinesApiJobPaths(override val workflowPaths: PipelinesApiWo
   override val scriptFilename: String = s"${PipelinesApiJobPaths.JesExecParamName}.sh"
 
   val jesLogFilename: String = s"$jesLogBasename.log"
-  lazy val jesLogPath: Path = callExecutionRoot.resolve(jesLogFilename)
+  lazy val jesLogPath: Path = callRoot.resolve(jesLogFilename)
 
   val jesMonitoringLogFilename: String = s"${PipelinesApiJobPaths.JesMonitoringKey}.log"
-  lazy val jesMonitoringLogPath: Path = callExecutionRoot.resolve(jesMonitoringLogFilename)
+  lazy val jesMonitoringLogPath: Path = callRoot.resolve(jesMonitoringLogFilename)
 
   val jesMonitoringScriptFilename: String = s"${PipelinesApiJobPaths.JesMonitoringKey}.sh"
 

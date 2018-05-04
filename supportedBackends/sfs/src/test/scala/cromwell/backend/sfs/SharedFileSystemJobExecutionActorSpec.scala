@@ -224,7 +224,7 @@ class SharedFileSystemJobExecutionActorSpec extends TestKitSuite("SharedFileSyst
         failedResponse.returnCode should be(empty)
         failedResponse.throwable should be(a[RuntimeException])
         failedResponse.throwable.getMessage should startWith("Unable to determine that 0 is alive, and")
-        failedResponse.throwable.getMessage should endWith("call-hello/execution/rc does not exist.")
+        failedResponse.throwable.getMessage should endWith("call-hello/rc does not exist.")
       }
     }
   }

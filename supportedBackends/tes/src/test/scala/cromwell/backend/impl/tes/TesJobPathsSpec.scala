@@ -20,15 +20,15 @@ class TesJobPathsSpec extends FlatSpec with Matchers with BackendSpec {
     jobPaths.callExecutionRoot.toString shouldBe
       File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution").pathAsString
     jobPaths.returnCode.toString shouldBe
-      File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/rc").pathAsString
+      File(s"local-cromwell-executions/wf_hello/$id/call-hello/rc").pathAsString
     jobPaths.script.toString shouldBe
-      File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/script").pathAsString
+      File(s"local-cromwell-executions/wf_hello/$id/call-hello/script").pathAsString
     jobPaths.stderr.toString shouldBe
-      File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/stderr").pathAsString
+      File(s"local-cromwell-executions/wf_hello/$id/call-hello/stderr").pathAsString
     jobPaths.stdout.toString shouldBe
-      File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/stdout").pathAsString
-    jobPaths.callExecutionRoot.toString shouldBe
-      File(s"local-cromwell-executions/wf_hello/$id/call-hello/execution").pathAsString
+      File(s"local-cromwell-executions/wf_hello/$id/call-hello/stdout").pathAsString
+    jobPaths.callRoot.toString shouldBe
+      File(s"local-cromwell-executions/wf_hello/$id/call-hello").pathAsString
     jobPaths.callDockerRoot.toString shouldBe
       File(s"/cromwell-executions/wf_hello/$id/call-hello").pathAsString
     jobPaths.callExecutionDockerRoot.toString shouldBe

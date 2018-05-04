@@ -40,22 +40,22 @@ class JobPathsSpec extends FlatSpec with Matchers with BackendSpec {
     jobPaths.callExecutionRoot.pathAsString shouldBe
       fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution")
     jobPaths.returnCode.pathAsString shouldBe
-      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/rc")
+      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/rc")
     jobPaths.script.pathAsString shouldBe
-      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/script")
+      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/script")
     jobPaths.stderr.pathAsString shouldBe
-      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/stderr")
+      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/stderr")
     jobPaths.stdout.pathAsString shouldBe
-      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution/stdout")
-    jobPaths.callExecutionRoot.pathAsString shouldBe
-      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/execution")
+      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello/stdout")
+    jobPaths.callRoot.pathAsString shouldBe
+      fullPath(s"local-cromwell-executions/wf_hello/$id/call-hello")
     jobPaths.callDockerRoot.pathAsString shouldBe
       fullPath(s"/cromwell-executions/wf_hello/$id/call-hello")
     jobPaths.callExecutionDockerRoot.pathAsString shouldBe
       fullPath(s"/cromwell-executions/wf_hello/$id/call-hello/execution")
     jobPaths.toDockerPath(DefaultPathBuilder.get(
-      s"local-cromwell-executions/wf_hello/$id/call-hello/execution/stdout")).pathAsString shouldBe
-      fullPath(s"/cromwell-executions/wf_hello/$id/call-hello/execution/stdout")
+      s"local-cromwell-executions/wf_hello/$id/call-hello/stdout")).pathAsString shouldBe
+      fullPath(s"/cromwell-executions/wf_hello/$id/call-hello/stdout")
     jobPaths.toDockerPath(DefaultPathBuilder.get("/cromwell-executions/dock/path")).pathAsString shouldBe
       fullPath("/cromwell-executions/dock/path")
 
