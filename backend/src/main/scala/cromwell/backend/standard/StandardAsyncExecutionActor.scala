@@ -152,9 +152,14 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     configurationDescriptor.globalConfig.getOrElse("system.job-shell", "/bin/bash"))
 
   /**
-    * The local path where the command will run.
+    * The local root directory for the call, contains detritus files that the execution may not want to see.
     */
-  lazy val commandDirectory: Path = jobPaths.callExecutionRoot
+  lazy val callDirectory: Path = jobPaths.callRoot
+
+  /**
+    * The local directory where the command will run.
+    */
+  lazy val callExecutionDirectory: Path = jobPaths.callExecutionRoot
 
   /**
     * Returns the shell scripting for finding all files listed within a directory.
@@ -181,14 +186,14 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
   }
 
   /**
-    * The local parent directory of the glob file. By default this is the same as the commandDirectory.
+    * The local parent directory of the glob file. By default this is the same as the call directory.
     *
     * In some cases, to allow the hard linking by ln to operate, a different mount point must be returned.
     *
     * @param wdlGlobFile The glob.
     * @return The parent directory for writing the wdl glob.
     */
-  def globParentDirectory(wdlGlobFile: WomGlobFile): Path = commandDirectory
+  def globParentDirectory(wdlGlobFile: WomGlobFile): Path = callDirectory
 
   /**
     * Returns the shell scripting for hard linking the glob results using ln.
@@ -238,8 +243,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
   def commandScriptContents: ErrorOr[String] = {
     jobLogger.info(s"`${instantiatedCommand.commandString}`")
 
-    val cwd = commandDirectory
-    val rcPath = cwd./(jobPaths.returnCodeFilename)
+    val rcPath = callDirectory./(jobPaths.returnCodeFilename)
     // It's here at instantiation time that the names of standard input/output/error files are calculated.
     // The standard input filename can be as ephemeral as the execution: the name needs to match the expectations of
     // the command, but the standard input file will never be accessed after the command completes. standard output and
@@ -255,7 +259,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     // references them outside a (cd "execution dir"; ...) subshell. The default names are known to be relative paths,
     // the names from redirections may or may not be relative.
     def absolutizeContainerPath(path: String): String = {
-      if (path.startsWith(cwd.pathAsString)) path else cwd.resolve(path).pathAsString
+      if (path.startsWith(callDirectory.pathAsString)) path else callDirectory.resolve(path).pathAsString
     }
 
     val executionStdin = instantiatedCommand.evaluatedStdinRedirection map absolutizeContainerPath
@@ -263,9 +267,9 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     val executionStderr = instantiatedCommand.evaluatedStderrOverride.getOrElse(jobPaths.defaultStderrFilename) |> absolutizeContainerPath
 
     def hostPathFromContainerPath(string: String): Path = {
-      val cwdString = cwd.pathAsString.ensureSlashed
+      val cwdString = callDirectory.pathAsString.ensureSlashed
       val relativePath = string.stripPrefix(cwdString)
-      jobPaths.callExecutionRoot.resolve(relativePath)
+      jobPaths.callRoot.resolve(relativePath)
     }
 
     // .get's are safe on stdout and stderr after falling back to default names above.
@@ -299,7 +303,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     val (out, err) = (s"out$shortId", s"err$shortId")
 
     val dockerOutputDir = jobDescriptor.taskCall.callable.dockerOutputDirectory map { d =>
-      s"ln -s $cwd $d"
+      s"ln -s $callExecutionDirectory $d"
     } getOrElse ""
 
     // The `tee` trickery below is to be able to redirect to known filenames for CWL while also streaming
@@ -308,14 +312,14 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     (errorOrDirectoryOutputs, errorOrGlobFiles).mapN((directoryOutputs, globFiles) =>
     s"""|#!$jobShell
         |DOCKER_OUTPUT_DIR_LINK
-        |cd $cwd
+        |cd $callDirectory
         |tmpDir=`$temporaryDirectory`
         |chmod 777 "$$tmpDir"
         |export _JAVA_OPTIONS=-Djava.io.tmpdir="$$tmpDir"
         |export TMPDIR="$$tmpDir"
         |export HOME="$home"
         |(
-        |cd $cwd
+        |cd $callExecutionDirectory
         |SCRIPT_PREAMBLE
         |)
         |$out="$${tmpDir}/out.$$$$" $err="$${tmpDir}/err.$$$$"
@@ -324,16 +328,19 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
         |tee $stdoutRedirection < "$$$out" &
         |tee $stderrRedirection < "$$$err" >&2 &
         |(
-        |cd $cwd
+        |cd $callExecutionDirectory
         |ENVIRONMENT_VARIABLES
         |INSTANTIATED_COMMAND
         |) $stdinRedirection > "$$$out" 2> "$$$err"
         |echo $$? > $rcTmpPath
         |(
-        |cd $cwd
+        |#not sure this is the right directory choice
+        |cd $callExecutionDirectory
         |SCRIPT_EPILOGUE
         |${globScripts(globFiles)}
         |${directoryScripts(directoryOutputs)}
+        |cd $callExecutionDirectory
+        |ln `ls -1 -A` ..
         |)
         |mv $rcTmpPath $rcPath
         |""".stripMargin
@@ -397,7 +404,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
       // redirection or override of the filename of a redirection. Evaluate that expression if present and stringify.
       val List(stdinRedirect, stdoutOverride, stderrOverride) = List[CommandTaskDefinition => Option[WomExpression]](
         _.stdinRedirection, _.stdoutOverride, _.stderrOverride) map {
-        _.apply(callable).traverse{ _.evaluateValue(valueMappedPreprocessedInputs, backendEngineFunctions) map { _.valueString} }
+        _.apply(callable).traverse[ErrorOr, String]{ _.evaluateValue(valueMappedPreprocessedInputs, backendEngineFunctions) map { _.valueString} }
       }
 
       (adHocFileCreationSideEffectFiles, environmentVariables, stdinRedirect, stdoutOverride, stderrOverride) mapN {

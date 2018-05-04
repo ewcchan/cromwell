@@ -42,7 +42,7 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
 
   // override lazy val dockerImageUsed: Option[String] = runtimeAttributes.docker map {docker => docker.image}
   override lazy val dockerImageUsed: Option[String] = None
-  override lazy val commandDirectory: Path = BcsJobPaths.BcsCommandDirectory.resolve(bcsJobPaths.callExecutionRoot.pathWithoutScheme)
+  override lazy val callExecutionDirectory: Path = BcsJobPaths.BcsCommandDirectory.resolve(bcsJobPaths.callExecutionRoot.pathWithoutScheme)
 
   private[bcs] lazy val userTag = runtimeAttributes.tag.getOrElse("cromwell")
   private[bcs] lazy val jobName: String =
@@ -111,7 +111,7 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
 
   private def relativePath(path: String): Path = {
     val absolutePath = DefaultPathBuilder.get(path) match {
-      case p if !p.isAbsolute => commandDirectory.resolve(p)
+      case p if !p.isAbsolute => callExecutionDirectory.resolve(p)
       case p => p
     }
 
@@ -173,7 +173,7 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
       if (ossPath.exists) {
         ossPathToMount(ossPath).dest.normalize().pathAsString
       } else {
-        commandDirectory.resolve(getOssFileName(ossPath)).normalize().pathAsString
+        callExecutionDirectory.resolve(getOssFileName(ossPath)).normalize().pathAsString
       }
     } else {
       userDefinedMounts collectFirst {
@@ -244,12 +244,12 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
   }
 
   private[bcs] lazy val rcBcsOutput = BcsOutputMount(
-    commandDirectory.resolve(bcsJobPaths.returnCodeFilename), bcsJobPaths.returnCode, writeSupport = false)
+    callExecutionDirectory.resolve(bcsJobPaths.returnCodeFilename), bcsJobPaths.returnCode, writeSupport = false)
 
   private[bcs] lazy val stdoutBcsOutput = BcsOutputMount(
-    commandDirectory.resolve(bcsJobPaths.defaultStdoutFilename), standardPaths.output, writeSupport = false)
+    callExecutionDirectory.resolve(bcsJobPaths.defaultStdoutFilename), standardPaths.output, writeSupport = false)
   private[bcs] lazy val stderrBcsOutput = BcsOutputMount(
-    commandDirectory.resolve(bcsJobPaths.defaultStderrFilename), standardPaths.error, writeSupport = false)
+    callExecutionDirectory.resolve(bcsJobPaths.defaultStderrFilename), standardPaths.error, writeSupport = false)
 
   private[bcs] lazy val uploadBcsWorkerPackage = {
     getPath(runtimeAttributes.workerPath.getOrElse(bcsJobPaths.workerFileName)) match {
@@ -363,10 +363,10 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
   }
 
   private[bcs] lazy val bcsEnvs: Map[String, String] = Map(
-      BcsJobPaths.BcsEnvCwdKey -> commandDirectory.pathAsString,
+      BcsJobPaths.BcsEnvCwdKey -> callExecutionDirectory.pathAsString,
       BcsJobPaths.BcsEnvExecKey -> bcsJobPaths.script.pathAsString,
-      BcsJobPaths.BcsEnvStdoutKey -> commandDirectory.resolve(bcsJobPaths.defaultStdoutFilename).pathAsString,
-      BcsJobPaths.BcsEnvStderrKey -> commandDirectory.resolve(bcsJobPaths.defaultStderrFilename).pathAsString,
+      BcsJobPaths.BcsEnvStdoutKey -> callExecutionDirectory.resolve(bcsJobPaths.defaultStdoutFilename).pathAsString,
+      BcsJobPaths.BcsEnvStderrKey -> callExecutionDirectory.resolve(bcsJobPaths.defaultStderrFilename).pathAsString,
       BcsConfiguration.OssEndpointKey -> bcsConfiguration.ossEndpoint,
       BcsConfiguration.OssIdKey -> bcsConfiguration.ossAccessId,
       BcsConfiguration.OssSecretKey -> bcsConfiguration.ossAccessKey,

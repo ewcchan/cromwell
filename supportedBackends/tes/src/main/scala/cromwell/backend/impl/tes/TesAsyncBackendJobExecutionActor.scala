@@ -79,13 +79,13 @@ class TesAsyncBackendJobExecutionActor(override val standardParams: StandardAsyn
       localPath match {
         case p if p.startsWith(tesJobPaths.workflowPaths.DockerRoot) => p.pathAsString
         case p if p.startsWith(tesJobPaths.callExecutionRoot) =>
-          tesJobPaths.containerExec(commandDirectory, localPath.getFileName.pathAsString)
+          tesJobPaths.containerExec(callExecutionDirectory, localPath.getFileName.pathAsString)
         case p => tesJobPaths.containerInput(p.pathAsString)
       }
     }
   }
 
-  override lazy val commandDirectory: Path = {
+  override lazy val callExecutionDirectory: Path = {
     runtimeAttributes.dockerWorkingDir match {
       case Some(path) => DefaultPathBuilder.get(path)
       case None => tesJobPaths.callExecutionDockerRoot
@@ -101,7 +101,7 @@ class TesAsyncBackendJobExecutionActor(override val standardParams: StandardAsyn
           jobLogger,
           tesJobPaths,
           runtimeAttributes,
-          commandDirectory,
+          callExecutionDirectory,
           _,
           instantiatedCommand,
           realDockerImageUsed))

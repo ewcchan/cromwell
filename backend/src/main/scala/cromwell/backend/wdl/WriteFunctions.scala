@@ -21,12 +21,12 @@ trait WriteFunctions extends PathFactory with IoFunctionSet with AsyncIoFunction
   /**
     * Directory that will be used to write files.
     */
-  def writeDirectory: Path
+  def callDirectory: Path
 
-  private lazy val _writeDirectory = if (isDocker) writeDirectory.createPermissionedDirectories() else writeDirectory.createDirectories()
+  private lazy val _callDirectory = if (isDocker) callDirectory.createPermissionedDirectories() else callDirectory.createDirectories()
 
   override def writeFile(path: String, content: String): Future[WomSingleFile] = {
-    val file = _writeDirectory / path
+    val file = _callDirectory / path
     asyncIo.existsAsync(file) flatMap {
       case false => asyncIo.writeAsync(file, content, OpenOptions.default) as { WomSingleFile(file.pathAsString) }
       case true => Future.successful(WomSingleFile(file.pathAsString))
@@ -39,7 +39,7 @@ trait WriteFunctions extends PathFactory with IoFunctionSet with AsyncIoFunction
 
   override def copyFile(pathFrom: String, targetName: String): Future[WomSingleFile] = {
     val source = buildPath(relativeToAbsolutePath(pathFrom))
-    val destination = _writeDirectory / targetName
+    val destination = _callDirectory / targetName
 
     asyncIo.copyAsync(source, destination).as(WomSingleFile(destination.pathAsString)) recoverWith {
       case e => Future.failed(new Exception(s"Could not copy ${source.toAbsolutePath} to ${destination.toAbsolutePath}", e))

@@ -60,18 +60,18 @@ trait JobPaths {
 
   def jobKey: BackendJobDescriptorKey
   lazy val callRoot = callPathBuilder(workflowPaths.workflowRoot, jobKey)
-  lazy val callExecutionRoot = callRoot
+  lazy val callExecutionRoot = callRoot.resolve("execution")
 
   // Use default stdout and stderr names by default. This StandardPaths `var` may be reassigned later to
   // enable dynamic standard output and error file names for languages like CWL that support this feature.
   var standardPaths: StandardPaths = StandardPaths(
-    output = callExecutionRoot.resolve(defaultStdoutFilename),
-    error = callExecutionRoot.resolve(defaultStderrFilename)
+    output = callRoot.resolve(defaultStdoutFilename),
+    error = callRoot.resolve(defaultStderrFilename)
   )
 
-  lazy val script = callExecutionRoot.resolve(scriptFilename)
-  lazy val dockerCid = callExecutionRoot.resolve(dockerCidFilename)
-  lazy val returnCode = callExecutionRoot.resolve(returnCodeFilename)
+  lazy val script = callRoot.resolve(scriptFilename)
+  lazy val dockerCid = callRoot.resolve(dockerCidFilename)
+  lazy val returnCode = callRoot.resolve(returnCodeFilename)
 
   // This is a `def` because `standardPaths` is a `var` that may be reassigned during the calculation of
   // standard output and error file names.

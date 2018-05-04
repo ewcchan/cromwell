@@ -114,7 +114,11 @@ trait SharedFileSystemAsyncJobExecutionActor
     }
   }
 
-  override lazy val commandDirectory: Path = {
+  override lazy val callDirectory: Path = {
+    if (isDockerRun) jobPathsWithDocker.callDockerRoot else jobPaths.callRoot
+  }
+
+  override lazy val callExecutionDirectory: Path = {
     if (isDockerRun) jobPathsWithDocker.callExecutionDockerRoot else jobPaths.callExecutionRoot
   }
 
