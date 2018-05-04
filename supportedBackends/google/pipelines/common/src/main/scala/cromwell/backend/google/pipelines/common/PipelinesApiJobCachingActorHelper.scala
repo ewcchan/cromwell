@@ -25,10 +25,10 @@ trait PipelinesApiJobCachingActorHelper extends StandardCachingActorHelper {
 
   lazy val workingDisk: PipelinesApiAttachedDisk = runtimeAttributes.disks.find(_.name == PipelinesApiWorkingDisk.Name).get
 
-  lazy val callRootPath: Path = pipelinesApiCallPaths.callExecutionRoot
+  lazy val callRootPath: Path = pipelinesApiCallPaths.callRoot
   lazy val returnCodeFilename: String = pipelinesApiCallPaths.returnCodeFilename
   lazy val returnCodeGcsPath: Path = pipelinesApiCallPaths.returnCode
-  lazy val jesLogPath: Path = pipelinesApiCallPaths.jesLogPath
+  lazy val jesLogFilename: String = pipelinesApiCallPaths.jesLogFilename
 
   lazy val maxPreemption: Int = runtimeAttributes.preemptible
   def preemptible: Boolean

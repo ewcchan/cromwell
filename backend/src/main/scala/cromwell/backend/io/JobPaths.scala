@@ -38,21 +38,21 @@ trait JobPaths {
 
   // In this non-Docker version of `JobPaths` there is no distinction between host and container roots so this is
   // just called 'rootWithSlash'.
-  private lazy val rootWithSlash = callExecutionRoot.pathAsString.ensureSlashed
+  private lazy val rootWithSlash = callRoot.pathAsString.ensureSlashed
 
-  def isInExecution(string: String): Boolean = string.startsWith(rootWithSlash)
+  def isInCallRoot(string: String): Boolean = string.startsWith(rootWithSlash)
 
   /**
     * Return a host path corresponding to the specified container path.
     */
   def hostPathFromContainerPath(string: String): Path = {
     // No container here, just return a Path of the absolute path to the file.
-    callExecutionRoot.resolve(string.stripPrefix(rootWithSlash))
+    callRoot.resolve(string.stripPrefix(rootWithSlash))
   }
 
   def hostPathFromContainerInputs(string: String): Path =
     // No container here, just return a Path of the absolute path to the file.
-    callExecutionRoot.resolve(string.stripPrefix(rootWithSlash))
+    callRoot.resolve(string.stripPrefix(rootWithSlash))
 
 
   def scriptFilename: String = "script"
@@ -104,5 +104,5 @@ trait JobPaths {
   lazy val detritusPaths = commonDetritusPaths ++ customDetritusPaths
   lazy val logPaths = commonLogPaths ++ customLogPaths
 
-  lazy val callContext = CallContext(callExecutionRoot, standardPaths, isDocker)
+  lazy val callContext = CallContext(callRoot, standardPaths, isDocker)
 }

@@ -339,8 +339,8 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
         |SCRIPT_EPILOGUE
         |${globScripts(globFiles)}
         |${directoryScripts(directoryOutputs)}
-        |cd $callExecutionDirectory
-        |ln `ls -1 -A` ..
+        |cd $callDirectory
+        |find execution -mindepth 1 -exec ln -s {} . \\;
         |)
         |mv $rcTmpPath $rcPath
         |""".stripMargin

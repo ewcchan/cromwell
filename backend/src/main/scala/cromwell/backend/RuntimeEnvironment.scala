@@ -20,7 +20,7 @@ object RuntimeEnvironmentBuilder {
    def apply(runtimeAttributes: Map[String, WomValue], jobPaths: JobPaths): MinimumRuntimeSettings => RuntimeEnvironment = {
      minimums =>
 
-       val outputPath: String = jobPaths.callExecutionRoot.pathAsString
+       val outputPath: String = jobPaths.callRoot.pathAsString
 
        val tempPath: String = {
          val uuid = UUID.randomUUID().toString
