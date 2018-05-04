@@ -74,6 +74,17 @@ final case class InitialWorkDirFileGeneratorExpression(entry: IwdrListingArrayEn
 object InitialWorkDirFileGeneratorExpression {
   type InitialWorkDirFileEvaluator = (ParameterContext, Map[String, WomValue]) => ErrorOr[WomValue]
 
+  implicit class EnhancedIoFunctionSet(val ioFunctionSet: IoFunctionSet) extends AnyVal {
+    def writeToExecutionDirectory(entryName: String, content: String): Future[WomSingleFile] = {
+      // Fun fact: this method gets used to localize every kind of WomFile to the IWDR, not just `WomSingleFile`s.
+      ioFunctionSet.writeFile("execution/" + entryName, content)
+    }
+
+    def copyToExecutionDirectory(source: String, destination: String): Future[WomSingleFile] = {
+      ioFunctionSet.copyFile(source, "execution/" + destination)
+    }
+  }
+
   /**
     * Converts an InitialWorkDir.
     *
@@ -111,7 +122,7 @@ object InitialWorkDirFileGeneratorExpression {
               }
               errorOrEntryName flatMap { entryName =>
                 validate {
-                  Await.result(unmappedParameterContext.ioFunctionSet.copyFile(womFile.value, entryName), Duration.Inf)
+                  Await.result(unmappedParameterContext.ioFunctionSet.copyToExecutionDirectory(womFile.value, entryName), Duration.Inf)
                 }
               }
             case other => for {
@@ -121,7 +132,7 @@ object InitialWorkDirFileGeneratorExpression {
               entryNameStringOrExpression <- expressionDirent.entryname.toErrorOr(
                 "Invalid dirent: Entry was a string but no file name was supplied")
               entryName <- entryNameStringOrExpression.fold(EntryNamePoly).apply(unmappedParameterContext)
-              writeFile = unmappedParameterContext.ioFunctionSet.writeFile(entryName, contentString)
+              writeFile = unmappedParameterContext.ioFunctionSet.writeToExecutionDirectory(entryName, contentString)
               writtenFile <- validate(Await.result(writeFile, Duration.Inf))
             } yield writtenFile
           }
@@ -136,7 +147,7 @@ object InitialWorkDirFileGeneratorExpression {
             for {
               entryName <- stringDirent.entryname.fold(EntryNamePoly).apply(unmappedParameterContext)
               contentString = stringDirent.entry
-              writeFile = unmappedParameterContext.ioFunctionSet.writeFile(entryName, contentString)
+              writeFile = unmappedParameterContext.ioFunctionSet.writeToExecutionDirectory(entryName, contentString)
               writtenFile <- validate(Await.result(writeFile, Duration.Inf))
             } yield writtenFile
         }
@@ -154,7 +165,7 @@ object InitialWorkDirFileGeneratorExpression {
             // the primary file.
             // The file should be staged to the initial work dir using the base filename.
             val baseFileName = unmappedParameterContext.ioFunctionSet.pathFunctions.name(file.value)
-            unmappedParameterContext.ioFunctionSet.copyFile(file.value, baseFileName)
+            unmappedParameterContext.ioFunctionSet.copyToExecutionDirectory(file.value, baseFileName)
           }
 
           def stageFiles(womArray: WomArray): ErrorOr[WomValue] = {
