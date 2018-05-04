@@ -42,6 +42,7 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
 
   // override lazy val dockerImageUsed: Option[String] = runtimeAttributes.docker map {docker => docker.image}
   override lazy val dockerImageUsed: Option[String] = None
+  override lazy val callDirectory: Path = BcsJobPaths.BcsCommandDirectory.resolve(bcsJobPaths.callRoot.pathWithoutScheme)
   override lazy val callExecutionDirectory: Path = BcsJobPaths.BcsCommandDirectory.resolve(bcsJobPaths.callExecutionRoot.pathWithoutScheme)
 
   private[bcs] lazy val userTag = runtimeAttributes.tag.getOrElse("cromwell")

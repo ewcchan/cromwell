@@ -311,7 +311,9 @@ class PipelinesApiAsyncBackendJobExecutionActor(override val standardParams: Sta
       pipelinesApiCallPaths.jesMonitoringLogPath.pathAsString, localMonitoringLogPath, workingDisk)
   }
 
-  override lazy val callExecutionDirectory: Path = PipelinesApiWorkingDisk.MountPoint
+  override lazy val callDirectory: Path = PipelinesApiWorkingDisk.MountPoint
+
+  override lazy val callExecutionDirectory: Path = PipelinesApiWorkingDisk.MountPoint.resolve("execution")
 
   private val DockerMonitoringLogPath: Path = PipelinesApiWorkingDisk.MountPoint.resolve(pipelinesApiCallPaths.jesMonitoringLogFilename)
   private val DockerMonitoringScriptPath: Path = PipelinesApiWorkingDisk.MountPoint.resolve(pipelinesApiCallPaths.jesMonitoringScriptFilename)
