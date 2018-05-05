@@ -447,11 +447,12 @@ class SparkJobExecutionActorSpec extends TestKitSuite("SparkJobExecutionActor")
     val backendConfigurationDescriptor = if (isCluster) BackendConfigurationDescriptor(backendClusterConfig, ConfigFactory.load) else BackendConfigurationDescriptor(backendClientConfig, ConfigFactory.load)
     val jobDesc = jobDescriptorFromSingleCallWorkflow(backendWorkflowDescriptor, Map.empty, WorkflowOptions.empty, Set.empty)
     val jobPaths = if (isCluster) JobPathsWithDocker(jobDesc.key, backendWorkflowDescriptor, backendClusterConfig) else JobPathsWithDocker(jobDesc.key, backendWorkflowDescriptor, backendClientConfig)
-    val executionDir = jobPaths.callExecutionRoot
-    val stdout = File(executionDir.toString, "stdout")
-    stdout.createIfNotExists(asDirectory = false, createParents = true)
-    val stderr = File(executionDir.toString, "stderr")
-    stderr.createIfNotExists(asDirectory = false, createParents = true)
+    val callDir = jobPaths.callRoot
+    jobPaths.callExecutionRoot.createIfNotExists(asDirectory = true, createParents = true)
+    val stdout = File(callDir.toString, "stdout")
+    stdout.createIfNotExists()
+    val stderr = File(callDir.toString, "stderr")
+    stderr.createIfNotExists()
     TestJobDescriptor(jobDesc, jobPaths, backendConfigurationDescriptor)
   }
 
