@@ -32,7 +32,7 @@ trait DirectoryFunctions extends IoFunctionSet with PathFactory {
   override def listDirectory(path: String): Future[Iterator[String]] = Future.fromTry(Try(buildPath(path.ensureSlashed).list.map(_.pathAsString)))
 
   override def listAllFilesUnderDirectory(dirPath: String): Future[Seq[String]] = {
-    temporaryImplListPaths(dirPath)
+    temporaryImplListPaths("execution/" + dirPath)
   }
 
   // TODO: WOM: WOMFILE: This will likely use a Tuple2(tar file, dir list file) for each dirPath.
