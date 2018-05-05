@@ -27,8 +27,10 @@ trait BackgroundAsyncJobExecutionActor extends SharedFileSystemAsyncJobExecution
   }
 
   override def makeProcessRunner(): ProcessRunner = {
-    val stdout = standardPaths.output.plusExt("background")
-    val stderr = standardPaths.error.plusExt("background")
+    // These '.background' versions of the standard path files always go in the call directory, even if the non-'.background'
+    // version of the file is in the execution directory.
+    val stdout = jobPaths.callRoot.resolve(standardPaths.output.name).plusExt("background")
+    val stderr = jobPaths.callRoot.resolve(standardPaths.error.name).plusExt("background")
     val argv = Seq("/bin/bash", backgroundScript)
     new ProcessRunner(argv, stdout, stderr)
   }
