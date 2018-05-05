@@ -337,12 +337,13 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
         |) $stdinRedirection > "$$$out" 2> "$$$err"
         |echo $$? > $rcTmpPath
         |(
-        |#not sure this is the right directory choice
+        |# not sure this is the right directory
         |cd $callExecutionDirectory
         |SCRIPT_EPILOGUE
         |${globScripts(globFiles)}
         |${directoryScripts(directoryOutputs)}
         |cd $callDirectory
+        |# whitespace-safe equivalent of ls -A to symlink all files in the execution directory into the call directory.
         |find execution -mindepth 1 -maxdepth 1 -exec ln -s {} . \\;
         |)
         |mv $rcTmpPath $rcPath
