@@ -264,7 +264,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
 
     val executionStdin = instantiatedCommand.evaluatedStdinRedirection map absolutizeContainerPath
     // If stdout or stderr have been overridden those files should appear in the execution directory, otherwise these
-    // files should go in the call root. The `.background` versions of these files should will always go to the call root
+    // files should go in the call root. The `.background` versions of these files should always go to the call root
     // but that is handled elsewhere.
     val executionStdout = instantiatedCommand.evaluatedStdoutOverride.map("execution/" + _).getOrElse(jobPaths.defaultStdoutFilename) |> absolutizeContainerPath
     val executionStderr = instantiatedCommand.evaluatedStderrOverride.map("execution/" + _).getOrElse(jobPaths.defaultStderrFilename) |> absolutizeContainerPath
@@ -343,7 +343,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
         |${globScripts(globFiles)}
         |${directoryScripts(directoryOutputs)}
         |cd $callDirectory
-        |find execution -mindepth 1 -exec ln -s {} . \\;
+        |find execution -mindepth 1 -maxdepth 1 -exec ln -s {} . \\;
         |)
         |mv $rcTmpPath $rcPath
         |""".stripMargin
