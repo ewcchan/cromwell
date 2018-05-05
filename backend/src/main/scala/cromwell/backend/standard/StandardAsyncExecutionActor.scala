@@ -178,7 +178,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
     */
   def directoryScript(unlistedDirectory: WomUnlistedDirectory): String = {
     val directoryPath = unlistedDirectory.value.ensureUnslashed
-    val directoryList = directoryPath + ".list"
+    val directoryList = callDirectory.resolve(directoryPath + ".list").pathAsString
 
     s"""|# list all the files that match the directory into a file called directory.list
         |find $directoryPath -type f > $directoryList
