@@ -28,7 +28,7 @@ trait PipelinesApiJobCachingActorHelper extends StandardCachingActorHelper {
   lazy val callRootPath: Path = pipelinesApiCallPaths.callRoot
   lazy val returnCodeFilename: String = pipelinesApiCallPaths.returnCodeFilename
   lazy val returnCodeGcsPath: Path = pipelinesApiCallPaths.returnCode
-  lazy val jesLogFilename: String = pipelinesApiCallPaths.jesLogFilename
+  lazy val jesLogPath: Path = pipelinesApiCallPaths.jesLogPath
 
   lazy val maxPreemption: Int = runtimeAttributes.preemptible
   def preemptible: Boolean
