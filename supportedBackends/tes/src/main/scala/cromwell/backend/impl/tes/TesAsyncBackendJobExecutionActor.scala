@@ -108,7 +108,7 @@ class TesAsyncBackendJobExecutionActor(override val standardParams: StandardAsyn
           jobLogger,
           tesJobPaths,
           runtimeAttributes,
-          callExecutionDirectory,
+          callDirectory,
           _,
           instantiatedCommand,
           realDockerImageUsed))
