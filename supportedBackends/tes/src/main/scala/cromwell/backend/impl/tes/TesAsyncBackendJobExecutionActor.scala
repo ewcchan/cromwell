@@ -94,7 +94,7 @@ class TesAsyncBackendJobExecutionActor(override val standardParams: StandardAsyn
 
   override lazy val callExecutionDirectory: Path = {
     runtimeAttributes.dockerWorkingDir match {
-      case Some(path) => DefaultPathBuilder.get(path)
+      case Some(path) => DefaultPathBuilder.get(path + "/execution")
       case None => tesJobPaths.callExecutionDockerRoot
     }
   }
