@@ -375,7 +375,10 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
       runtimeEnvironment
     )
 
-    def adHocFileLocalization(womFile: WomFile): String = womFile.value.substring(womFile.value.lastIndexOf("/") + 1)
+    def adHocFileLocalization(womFile: WomFile): String = {
+      val targetFileName = womFile.value.substring(womFile.value.lastIndexOf("/") + 1)
+      (if (womFile.value.endsWith("/execution/" + targetFileName)) "execution/" else "") + targetFileName
+    }
 
     def validateAdHocFile(value: WomValue): ErrorOr[List[WomFile]] = value match {
       case f: WomFile => List(f).valid

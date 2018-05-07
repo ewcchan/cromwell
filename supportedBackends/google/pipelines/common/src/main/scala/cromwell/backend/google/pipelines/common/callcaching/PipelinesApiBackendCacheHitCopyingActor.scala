@@ -62,7 +62,7 @@ class PipelinesApiBackendCacheHitCopyingActor(standardParams: StandardCacheHitCo
              |The original outputs can be found at this location: ${sourceCallRootPath.pathAsString}
       """.stripMargin
 
-        List(Set(GcsBatchCommandBuilder.writeCommand(jobPaths.callExecutionRoot / "call_caching_placeholder.txt", content, Seq(CloudStorageOptions.withMimeType("text/plain")))))
+        List(Set(GcsBatchCommandBuilder.writeCommand(jobPaths.callRoot / "call_caching_placeholder.txt", content, Seq(CloudStorageOptions.withMimeType("text/plain")))))
       case CopyCachedOutputs => List.empty
     }
   }
