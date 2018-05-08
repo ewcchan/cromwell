@@ -238,6 +238,6 @@ trait SharedFileSystemAsyncJobExecutionActor
   }
 
   override def mapOutputWomFile(womFile: WomFile): WomFile = {
-    sharedFileSystem.mapJobWomFile(jobPaths)(womFile)
+    sharedFileSystem.mapJobOutputWomFile(jobPaths)(womFile)
   }
 }

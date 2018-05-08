@@ -129,22 +129,22 @@ trait SharedFileSystem extends PathFactory {
     localizePathAlreadyLocalized _ +: mappedDuplicationStrategies
   }
 
-  def hostAbsoluteFilePath(jobPaths: JobPaths, pathString: String): Path = {
+  private def hostOutputAbsoluteFilePath(jobPaths: JobPaths, pathString: String): Path = {
     val path = PathFactory.buildPath(pathString, pathBuilders)
     path match {
-      case _: DefaultPath if !path.isAbsolute => jobPaths.callRoot.resolve(path).toAbsolutePath
+      case _: DefaultPath if !path.isAbsolute => jobPaths.callExecutionRoot.resolve(path).toAbsolutePath
       case _: DefaultPath if jobPaths.isInCallRoot(path.pathAsString) => jobPaths.hostPathFromContainerPath(path.pathAsString)
       case _: DefaultPath => jobPaths.hostPathFromContainerInputs(path.pathAsString)
     }
   }
 
   def outputMapper(job: JobPaths)(womValue: WomValue): Try[WomValue] = {
-    WomFileMapper.mapWomFiles(mapJobWomFile(job))(womValue)
+    WomFileMapper.mapWomFiles(mapJobOutputWomFile(job))(womValue)
   }
 
-  def mapJobWomFile(jobPaths: JobPaths)(womFile: WomFile): WomFile = {
-    val hostPath = hostAbsoluteFilePath(jobPaths, womFile.valueString)
-    def hostAbsolute(pathString: String): String = hostAbsoluteFilePath(jobPaths, pathString).pathAsString
+  def mapJobOutputWomFile(jobPaths: JobPaths)(womFile: WomFile): WomFile = {
+    val hostPath = hostOutputAbsoluteFilePath(jobPaths, womFile.valueString)
+    def hostAbsolute(pathString: String): String = hostOutputAbsoluteFilePath(jobPaths, pathString).pathAsString
 
     if (!hostPath.exists) throw new FileNotFoundException(s"Could not process output, file not found: ${hostAbsolute(womFile.valueString)}")
 
