@@ -287,7 +287,12 @@ trait WdlStandardLibraryFunctions extends WdlFunctions[WomValue] {
   private def readContentsFromSingleFileParameter(functionName: String, params: Seq[Try[WomValue]]): Try[String] = {
     for {
       singleArgument <- extractSingleArgument(functionName, params)
-      string = readFile(singleArgument.valueString)
+      maybeAdjustedFilePath = singleArgument match {
+        // If this is a WomString as opposed to a WomFile then the file is implicitly in the execution directory.
+        case s: WomString => "execution/" + s.valueString
+        case o => o.valueString
+      }
+      string = readFile(maybeAdjustedFilePath)
     } yield string
   }
 
