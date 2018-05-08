@@ -30,7 +30,7 @@ case class TesJobPaths private[tes] (override val workflowPaths: TesWorkflowPath
 
   // Given an output path, return a path localized to the storage file system
   def storageOutput(path: String): String = {
-    callExecutionRoot.resolve(path).toString
+    callRoot.resolve(path).toString
   }
 
   def containerInput(path: String): String = {

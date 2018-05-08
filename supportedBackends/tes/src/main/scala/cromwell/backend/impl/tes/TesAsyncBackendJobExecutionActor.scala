@@ -78,8 +78,8 @@ class TesAsyncBackendJobExecutionActor(override val standardParams: StandardAsyn
       val localPath = DefaultPathBuilder.get(path).toAbsolutePath
       localPath match {
         case p if p.startsWith(tesJobPaths.workflowPaths.DockerRoot) => p.pathAsString
-        case p if p.startsWith(tesJobPaths.callExecutionRoot) =>
-          tesJobPaths.containerExec(callExecutionDirectory, localPath.getFileName.pathAsString)
+        case p if p.startsWith(tesJobPaths.callRoot) =>
+          tesJobPaths.containerExec(callDirectory, localPath.getFileName.pathAsString)
         case p => tesJobPaths.containerInput(p.pathAsString)
       }
     }
