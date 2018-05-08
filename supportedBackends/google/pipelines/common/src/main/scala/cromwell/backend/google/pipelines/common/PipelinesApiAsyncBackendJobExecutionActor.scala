@@ -272,7 +272,7 @@ class PipelinesApiAsyncBackendJobExecutionActor(override val standardParams: Sta
   }
 
   private def generateJesSingleFileOutputs(womFile: WomSingleFile): List[PipelinesApiFileOutput] = {
-    val destination = callRootPath.resolve(womFile.value.stripPrefix("/")).pathAsString
+    val destination = callExecutionPath.resolve(womFile.value.stripPrefix("/")).pathAsString
     val (relpath, disk) = relativePathAndAttachedDisk(womFile.value, runtimeAttributes.disks)
     val jesFileOutput = PipelinesApiFileOutput(makeSafeJesReferenceName(womFile.value), destination, relpath, disk)
     List(jesFileOutput)

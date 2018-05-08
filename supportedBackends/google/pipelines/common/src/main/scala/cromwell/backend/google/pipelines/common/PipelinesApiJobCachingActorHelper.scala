@@ -26,6 +26,7 @@ trait PipelinesApiJobCachingActorHelper extends StandardCachingActorHelper {
   lazy val workingDisk: PipelinesApiAttachedDisk = runtimeAttributes.disks.find(_.name == PipelinesApiWorkingDisk.Name).get
 
   lazy val callRootPath: Path = pipelinesApiCallPaths.callRoot
+  lazy val callExecutionPath: Path = pipelinesApiCallPaths.callExecutionRoot
   lazy val returnCodeFilename: String = pipelinesApiCallPaths.returnCodeFilename
   lazy val returnCodeGcsPath: Path = pipelinesApiCallPaths.returnCode
   lazy val jesLogPath: Path = pipelinesApiCallPaths.jesLogPath
