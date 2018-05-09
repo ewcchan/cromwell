@@ -339,7 +339,7 @@ trait StandardAsyncExecutionActor extends AsyncBackendJobExecutionActor with Sta
         |echo $$? > $rcTmpPath
         |(
         |# not sure this is the right directory
-        |cd $callDirectory
+        |cd $callExecutionDirectory
         |SCRIPT_EPILOGUE
         |${globScripts(globFiles)}
         |${directoryScripts(directoryOutputs)}
