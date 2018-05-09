@@ -337,8 +337,12 @@ object WdlStandardLibraryFunctions {
         def fileSize(womValue: Try[WomValue], convertTo: Try[MemoryUnit] = Success(MemoryUnit.Bytes)): Try[Double] = {
           for {
             value <- womValue
+            updatedValue = value match {
+              case WomString(s) => WomString("execution/" + s)
+              case o => o
+            }
             unit <- convertTo
-            fileSize <- optionalSafeFileSize(value)
+            fileSize <- optionalSafeFileSize(updatedValue)
           } yield MemorySize(fileSize.toDouble, MemoryUnit.Bytes).to(unit).amount
         }
 
