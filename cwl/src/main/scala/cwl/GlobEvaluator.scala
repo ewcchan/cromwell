@@ -28,7 +28,7 @@ object GlobEvaluator {
   }
 
   def globs(glob: Glob, parameterContext: ParameterContext, expressionLib: ExpressionLib): ErrorOr[List[String]] = {
-    glob.fold(GlobEvaluator.GlobEvaluatorPoly).apply(parameterContext, expressionLib)
+    glob.fold(GlobEvaluator.GlobEvaluatorPoly).apply(parameterContext, expressionLib) map { _.map { "execution/" + _ } }
   }
 
   object GlobEvaluatorPoly extends Poly1 {
